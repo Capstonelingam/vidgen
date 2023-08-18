@@ -19,27 +19,27 @@ from torch.utils.data import Dataset
 from einops import rearrange, repeat
 
     # Inspired by the VideoMAE repository.
-    def normalize_input(
-        item, 
-        mean=[0.485, 0.456, 0.406], 
-        std=[0.229, 0.224, 0.225],
-        use_simple_norm=False
-    ):
-        if item.dtype == torch.uint8 and not use_simple_norm:
-            item = rearrange(item, 'f c h w -> f h w c')
-            
-            item = item.float() / 255.0
-            mean = torch.tensor(mean)
-            std = torch.tensor(std)
+def normalize_input(
+    item, 
+    mean=[0.485, 0.456, 0.406], 
+    std=[0.229, 0.224, 0.225],
+    use_simple_norm=False
+):
+    if item.dtype == torch.uint8 and not use_simple_norm:
+        item = rearrange(item, 'f c h w -> f h w c')
+        
+        item = item.float() / 255.0
+        mean = torch.tensor(mean)
+        std = torch.tensor(std)
 
-            out = rearrange((item - mean) / std, 'f h w c -> f c h w')
-            
-            return out
-        else:
-            # Normalize between -1 & 1
-            item = rearrange(item, 'f c h w -> f h w c')
-            return  rearrange(item / (127.5 - 1.0), 'f h w c -> f c h w')
-            
+        out = rearrange((item - mean) / std, 'f h w c -> f c h w')
+        
+        return out
+    else:
+        # Normalize between -1 & 1
+        item = rearrange(item, 'f c h w -> f h w c')
+        return  rearrange(item / (127.5 - 1.0), 'f h w c -> f c h w')
+        
 def get_prompt_ids(prompt, tokenizer):
     prompt_ids = tokenizer(
             prompt,
