@@ -1,3 +1,5 @@
+
+custom_tensors/
 output/
 models/lama.ckpt
 .vscode/

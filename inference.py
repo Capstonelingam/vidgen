@@ -1,24 +1,3 @@
-# MIT License
-
-# Copyright (c) 2023 Hans Brouwer
-
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
 
 
 import argparse
@@ -33,7 +12,7 @@ from uuid import uuid4
 import numpy as np
 import torch
 from compel import Compel
-from diffusers import DPMSolverMultistepScheduler, TextToVideoSDPipeline, UNet3DConditionModel
+from diffusers import DPMSolverMultistepScheduler, TextToVideoSDPipeline, UNet3DConditionModel,StableDiffusionPipeline
 from einops import rearrange
 from torch import Tensor
 from torch.nn.functional import interpolate
@@ -288,6 +267,8 @@ def inference(
     lora_rank: int = 64,
     loop: bool = False,
     seed: Optional[int] = None,
+    custom_pipeline: bool = False,
+    custom_pipeline_path: str = ""
 ):
     if seed is not None:
         torch.manual_seed(seed)
@@ -295,9 +276,14 @@ def inference(
     with torch.autocast(device, dtype=torch.half):
         # prepare models
         pipe = initialize_pipeline(model, device, xformers, sdp, lora_path, lora_rank)
-
+        
         # prepare prompts
+        if custom_pipeline:
+            pipe.load_textual_inversion(custom_pipeline_path)
         compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
+#         if custom_pipeline:
+#             aux_pipe=StableDiffusionPipeline.from_single_file('./custom_tensors/aa_dp-11.safetensors')
+#             compel=Compel(tokenizer=aux_pipe.tokenizer, text_encoder=aux_pipe.text_encoder)
         prompt_embeds, negative_prompt_embeds = compel(prompt), compel(negative_prompt) if negative_prompt else None
 
         # prepare input latents
@@ -363,6 +349,8 @@ if __name__ == "__main__":
     parser.add_argument("-rw", "--remove-watermark", action="store_true", help="Post-process the videos with LAMA to inpaint ModelScope's common watermarks.")
     parser.add_argument("-l", "--loop", action="store_true", help="Make the video loop (by rotating frame order during diffusion).")
     parser.add_argument("-r", "--seed", type=int, default=None, help="Random seed to make generations reproducible.")
+    parser.add_argument("-cp","--custom_pipeline",type=bool, default=False, help="Load with Custom Pipeline.")
+    parser.add_argument("-cpp","--custom_pipeline_path",type=str, default="", help="Path to Custom Pipeline.")
     args = parser.parse_args()
     # fmt: on
 
@@ -412,6 +400,8 @@ if __name__ == "__main__":
         lora_path=args.lora_path,
         lora_rank=args.lora_rank,
         loop=args.loop,
+        custom_pipeline =args.custom_pipeline,
+        custom_pipeline_path=args.custom_pipeline_path
     )
 
     # =========================================
