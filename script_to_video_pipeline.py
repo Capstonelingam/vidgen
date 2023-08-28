@@ -5,7 +5,7 @@ import os
 from einops import rearrange
 from utils.lama import inpaint_watermark
 from train import export_to_video
-
+from utils.video_sticher import stitch_video 
 class ScriptToVideoPipeline:
     def __init__(self, script, model_path):
         self.script = script

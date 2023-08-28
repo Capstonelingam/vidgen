@@ -25,7 +25,7 @@ def concatenate(output_folder,video_clip_paths, output_path, method="compose"):
     final_clip.write_videofile(output_path)
 
 def stitch_video(output_folder):
-    L = []
+
     for root, dirs, files in os.walk(f"{output_folder}"):
 
 
