@@ -1,6 +1,10 @@
 from inference import inference  # inference.py
 from typing import List, Optional
 from script_preprocessor import createJSON
+import os
+from einops import rearrange
+from utils.lama import inpaint_watermark
+from train import export_to_video
 
 class ScriptToVideoPipeline:
     def __init__(self, script, model_path):
@@ -27,9 +31,25 @@ class ScriptToVideoPipeline:
 
 
     
-    def save_video(self, video, path="outputs",name):
+    def save_video(self, videos,fps, filename="outputs/test_video",remove_watermark=False):
         # saves video to path
-        pass
+    
+
+        for video in videos:
+            if remove_watermark:
+                print("Inpainting watermarks...")
+                video = rearrange(video, "c f h w -> f c h w").add(1).div(2)
+                video = inpaint_watermark(video)
+                video = rearrange(video, "f c h w -> f h w c").clamp(0, 1).mul(255)
+
+            else:
+                video = rearrange(video, "c f h w -> f h w c").clamp(-1, 1).add(1).mul(127.5)
+
+            video = video.byte().cpu().numpy()
+
+            export_to_video(video, f"{filename}.mp4", fps)
+
+
 
     def generate_video(self,
                        sceneList,
@@ -53,6 +73,8 @@ class ScriptToVideoPipeline:
                        seed: Optional[int] = 6969,
                        custom_pipeline: bool = False,
                        custom_pipeline_path: str = "",#path to bin file with textual inversion
+                       use_previous_video: bool = False,
+                       fps:int=20
                        ):
 
 
@@ -61,11 +83,17 @@ class ScriptToVideoPipeline:
         #save all intermediate videos in a folder with scene number 
         #stitch them together at the end
 
+        output_folder = f"output/{sceneList[0]}"
+        os.makedirs(output_folder, exist_ok=True)
+
+
 
         #init_video = "takes the path to the previous video that has already been generated"
-        init_video = "output/A chicken crossing the road .Anime style 110156a9.mp4"
+        init_video = None
 
-        for scene in sceneList:
+        for scene_num,scene in enumerate(sceneList):
+            output_path=f"{scene_num}_{scene}.mp4"
+            
             video=inference(model,
                       scene,
                       negative_prompt=negative_prompt,
@@ -88,7 +116,18 @@ class ScriptToVideoPipeline:
                       custom_pipeline=custom_pipeline,
                       custom_pipeline_path=custom_pipeline_path,
                       )
-        
+            
+
+            #save the video
+            self.save_video(video,fps, f"{output_folder}/{output_path}", remove_watermark=True)
+            
+            if use_previous_video:
+                if init_video==None:
+                    init_video = output_path
+                else:
+                    init_video = output_path
+            else:
+                init_video=None
 
 
     def run(self):
