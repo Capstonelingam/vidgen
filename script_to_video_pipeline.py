@@ -55,6 +55,14 @@ class ScriptToVideoPipeline:
                        custom_pipeline_path: str = "",#path to bin file with textual inversion
                        ):
 
+
+        #to make a file handling solution for this
+        #give an option to the user to either use the previous video or not
+        #save all intermediate videos in a folder with scene number 
+        #stitch them together at the end
+
+
+        #init_video = "takes the path to the previous video that has already been generated"
         init_video = "output/A chicken crossing the road .Anime style 110156a9.mp4"
 
         for scene in sceneList:
