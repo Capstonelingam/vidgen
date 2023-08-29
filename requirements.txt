@@ -5,6 +5,7 @@ torchaudio
 git+https://github.com/huggingface/diffusers.git
 git+https://github.com/cloneofsimo/lora.git
 git+https://github.com/microsoft/LoRA
+git+https://github.com/CoderCatA5/sd-leap-booster.git
 transformers
 einops
 decord

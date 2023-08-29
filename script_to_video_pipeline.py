@@ -94,28 +94,28 @@ class ScriptToVideoPipeline:
         for scene_num,scene in enumerate(sceneList):
             output_path=f"{scene_num}_{scene}.mp4"
             
-            video=inference(model,
-                      scene,
-                      negative_prompt=negative_prompt,
-                      width=width,
-                      height=height,
-                      num_frames=num_frames,
-                      window_size=window_size,
-                      vae_batch_size=vae_batch_size,
-                      num_steps=num_steps,
-                      guidance_scale=guidance_scale,
-                      init_video=init_video,
-                      init_weight=init_weight,
-                      device=device,
-                      xformers=xformers,
-                      sdp=sdp,
-                      lora_path=lora_path,
-                      lora_rank=lora_rank,
-                      loop=loop,
-                      seed=seed,
-                      custom_pipeline=custom_pipeline,
-                      custom_pipeline_path=custom_pipeline_path,
-                      )
+            video = inference(
+                model=model,
+                prompt=scene,
+                negative_prompt=negative_prompt,
+                width=width,
+                height=height,
+                num_frames=num_frames,
+                window_size=window_size,
+                vae_batch_size=vae_batch_size,
+                num_steps=num_steps,
+                guidance_scale=guidance_scale,
+                init_video=init_video,
+                init_weight=init_weight,
+                device=device,
+                xformers=xformers,
+                sdp=sdp,
+                lora_path=lora_path,
+                lora_rank=lora_rank,
+                loop=loop,
+                custom_pipeline =custom_pipeline,
+                custom_pipeline_path=custom_pipeline_path
+            )
             
 
             #save the video
@@ -137,5 +137,7 @@ class ScriptToVideoPipeline:
         #model = "damo-vilab/text-to-video-ms-1.7b"  all purpose use with a remove watermark
 
 
-        sceneList = self.prepare_inputs_for_vidgen(self.script)
-        self.generate_video(sceneList, model=self.model_path, init_video=None, seed=6969, custom_pipeline=False)
+        #sceneList = self.prepare_inputs_for_vidgen(self.script)
+        prepped_script = ['<james> standing', '<james sitting>',
+                          '<james> walking', '<james> running']
+        self.generate_video(prepped_script, model=self.model_path, init_video=None, seed=6969, custom_pipeline=False)
