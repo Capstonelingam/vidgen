@@ -351,13 +351,15 @@ if __name__ == "__main__":
     parser.add_argument("-r", "--seed", type=int, default=None, help="Random seed to make generations reproducible.")
     parser.add_argument("-cp","--custom_pipeline",type=bool, default=False, help="Load with Custom Pipeline.")
     parser.add_argument("-cpp","--custom_pipeline_path",type=str, default="", help="Path to Custom Pipeline.")
+    parser.add_argument("-sop","--scene_out_path",type=str, default="", help="Path to individual Prompt video path.")
+    parser.add_argument("-snum", "--scene_number", type = int, default=0, help = "Prompt Number")
     args = parser.parse_args()
     # fmt: on
 
     # =========================================
     # ====== validate and prepare inputs ======
     # =========================================
-
+     
     out_name = f"{args.output_dir}/"
     if args.init_video is not None:
         out_name += f"[({Path(args.init_video).stem}) x {args.init_weight}] "
@@ -376,7 +378,13 @@ if __name__ == "__main__":
         init = rearrange(vr[:], "f h w c -> c f h w").div(127.5).sub(1).unsqueeze(0)
         init = interpolate(init, size=(args.num_frames, args.height, args.width), mode="trilinear")
         args.init_video = init
-
+    if args.scene_out_path:
+        scenePath = args.scene_out_path
+        print(scenePath)
+    if args.scene_number:
+        sceneNumber = args.scene_number
+        print(sceneNumber)
+        
     # =========================================
     # ============= sample videos =============
     # =========================================
@@ -422,4 +430,4 @@ if __name__ == "__main__":
 
         video = video.byte().cpu().numpy()
 
-        export_to_video(video, f"{out_name} {str(uuid4())[:8]}.mp4", args.fps)
+        export_to_video(video, f"{scenePath}/temp/{str(sceneNumber)}.mp4", args.fps)

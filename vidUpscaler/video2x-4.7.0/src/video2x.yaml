@@ -1,0 +1,111 @@
+# Name: Video2X Configuration File
+# Creator: K4YT3X
+# Edited: lenardcarroll
+# Date Created: October 23, 2018
+# Last Modified: February 19, 2022
+# Values here are the default values. Change the value here to
+#   save the default value permanently.
+# Items commented out are parameters irrelevant to this context
+#   or parameters handled by Video2X internally.
+waifu2x_ncnn_vulkan:
+  path: '/content/waifu2x-ncnn-vulkan-20200818-linux/waifu2x-ncnn-vulkan'
+  v: null # verbose output
+  #i: null # input-path: input image path (jpg/png) or directory
+  #o: null # output-path: output image path (png) or directory
+  'n': 3 # noise-level: denoise level (-1/0/1/2/3/4/5/6/7/8/9/10, default=3)
+  s: 2 # upscale ratio (2/3/4, default=2)
+  t: 400 # tile-size: tile size (>=32, default=400)
+  m: null # srmd model path (default=models-srmd)
+  g: 0 # gpu device to use (default=0)
+  j: '1:2:2' # thread count for load/proc/save (default=1:2:2)
+  x: false # enable tta mode
+  #f: png # output image format (jpg/png/webp, default=ext/png)
+srmd_ncnn_vulkan:
+  path: '/content/srmd-ncnn-vulkan-20200818-linux/srmd-ncnn-vulkan'
+  v: null # verbose output
+  #i: null # input-path: input image path (jpg/png) or directory
+  #o: null # output-path: output image path (png) or directory
+  'n': 3 # noise-level: denoise level (-1/0/1/2/3/4/5/6/7/8/9/10, default=3)
+  s: 2 # upscale ratio (2/3/4, default=2)
+  t: 400 # tile-size: tile size (>=32, default=400)
+  m: null # srmd model path (default=models-srmd)
+  g: 0 # gpu device to use (default=0)
+  j: '1:2:2' # thread count for load/proc/save (default=1:2:2)
+  x: false # enable tta mode
+  #f: png # output image format (jpg/png/webp, default=ext/png)
+realsr_ncnn_vulkan:
+  path: '/content/realsr-ncnn-vulkan-20200818-linux/realsr-ncnn-vulkan'
+  v: null # verbose output
+  #i: null # input-path: input image path (jpg/png) or directory
+  #o: null # output-path: output image path (png) or directory
+  s: 4 # upscale ratio (4, default=4)
+  t: 0 # tile size (>=32/0=auto, default=0)
+  m: null # realsr model path (default=models-DF2K)
+  g: 0 # gpu device to use (default=0)
+  j: '1:2:2' # thread count for load/proc/save (default=1:2:2)
+  x: false # enable tta mode
+  #f: png # output image format (jpg/png/webp, default=ext/png)
+ffmpeg:
+  ffmpeg_path: '/usr/bin/'
+  intermediate_file_name: 'intermediate.mkv'
+  # Step 1: Frame Extraction
+  # extract all frames from original input into temporary directory
+  extract_frames:
+    '-hwaccel': auto # automatically select hardware acceleration method
+    '-y': true
+    input_options: {} # empty dict, expand if necessary
+    output_options:
+      '-pix_fmt': rgb24 # extracted frames pixel format
+      '-qscale:v': null # output image quality control for JPEG (1-31, 1 being highest)
+  # Step 2: Video Assembly
+  # assemble all frames back into a video with only a video track
+  assemble_video:
+    '-hwaccel': auto # automatically select hardware acceleration method
+    '-y': true
+    input_options:
+      '-f': image2 # force image2 format
+    output_options:
+      '-vcodec': libx264 # video codec
+      '-pix_fmt': 'yuv420p' # overwrite default pixel format
+      '-crf': 17 # H.264 Constant Rate Factor
+      '-b:v': null # target average bitrate
+      '-vf': 'pad=ceil(iw/2)*2:ceil(ih/2)*2' # ensure output is divisible by 2, recommended for libx264
+      '-tune': 'animation' # encoding tuning film/animation/grain/stillimage/fastdecode/zerolatency/psnr/ssim
+  # Step 3: Streams Migration
+  # migrate audio and subtitle streams from original
+  #   video into the upscaled video
+  migrate_streams:
+    '-hwaccel': auto # automatically select hardware acceleration method
+    '-y': true
+    input_options: {} # empty dict, expand if necessary
+    output_options:
+      '-map':
+        - '0:v?' # copy video streams
+        - '1:a?' # copy audio streams
+        - '1:s?' # copy subtitle streams
+        - '1:d?' # copy data streams
+        - '1:t?' # copy fonts
+      '-c': copy # copy codec for all streams
+      # '-vf': 'minterpolate=''fps=60''' # minterpolate frame interpolation
+      '-map_metadata': 0 # copy known metadata tags
+      # '-movflags': 'use_metadata_tags' # copy custom/arbitrary metadata tags
+      '-pix_fmt': null
+      '-metadata': 'comment=Upscaled by Video2X'
+gifski:
+  gifski_path: '/content/video2x-4.7.0/src/wrappers'
+  # output: null # Destination file to write to
+  # fps: 20 # Animation frames per second (for PNG frames only) [default: 20]
+  fast: false # 3 times faster encoding, but 10% lower quality and bigger file
+  quality: 100 # Lower quality may give smaller file
+  #width: null # Maximum width
+  #height: null # Maximum height (if width is also set)
+  once: false # Do not loop the GIF
+  nosort: false # Use files exactly in the order given, rather than sorted
+  quiet: false # Do not show a progress bar
+video2x:
+  video2x_cache_directory: null # default: %TEMP%\video2x, directory where cache files are stored, will be deleted if preserve_frames is not set to true
+  extracted_frame_format: png # png/jpg intermediate file format used for extracted frames during video processing
+  output_file_name_format_string: "{original_file_name}_output{extension}" # format string to use for generating output file names
+  image_output_extension: .png # image output extension during batch processing
+  video_output_extension: .mp4 # video output extension during batch processing
+  preserve_frames: false # if set to true, the cache directory won't be cleaned upon task completion

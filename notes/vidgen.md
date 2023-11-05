@@ -42,6 +42,13 @@
 - **diffuse** 
     - **main logic of the inference lies here**
     - encodes prompt to embeddings 
+    - rotate adds shifts to the video (changes order of break points so that we get an illusion of looping)
+
+    - use a unet to predict `noise_residual`
+    - `noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)`
+    
+`
+
 
 
 
