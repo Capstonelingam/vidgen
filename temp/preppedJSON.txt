@@ -1,0 +1,9 @@
+
+    {
+    
+        "Scene 1": {"Actions":["Emily wanders through the French Quarter", "Marcus plays his guitar on a corner", "Emily sketches Marcus" ], "Env": "New Orleans" } ,
+    
+        "Scene 2": {"Actions":["Alex dives into the digital realm", "Elena grapples with the moral implications of artificial intelligence" ], "Env": "Neonova" } ,
+    
+        "Scene 3": {"Actions":["Emily and Marcus collaborate on an art exhibit", "Alex and Elena's online exchanges deepen"  ], "Env": "New Orleans" }
+}

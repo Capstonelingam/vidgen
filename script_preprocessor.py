@@ -6,6 +6,8 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 from threading import Thread
 import guidance
 import json
+import gc
+import tempfile
 
 def load_llm():
     model_id = "Trelis/Llama-2-7b-chat-hf-sharded-bf16-5GB" # sharded model by RonanKMcGovern. Change the model here to load something else.
@@ -30,8 +32,8 @@ def load_llm():
     tokenizer.pad_token = tokenizer.eos_token
     return model,tokenizer
 
-def get_char_list(script):
-    model,tokenizer = load_llm()
+def get_char_list(script,model,tokenizer):
+   # model,tokenizer = load_llm()
     guidance.llm = guidance.llms.Transformers(model=model, tokenizer=tokenizer)
     characters = guidance("""[INST]
     <<SYS>>
@@ -45,7 +47,17 @@ def get_char_list(script):
     """)
     out = characters(story = script).variables()['characters']
     charList = out.split(",")
-    return charList
+    
+
+    #freeing memory
+    model,tokenizer = None,None
+    guidance.llm=None
+    del characters
+    gc.collect()
+    torch.cuda.empty_cache()
+
+    #return charList
+    return out
     
 
 def generate_with_guidance(script,model,tokenizer):
@@ -88,6 +100,7 @@ def generate_with_guidance(script,model,tokenizer):
     }
     ```
     """
+    
     program = guidance(prompt)
     out = program(story = script)
     out = str(out).split("```json")[1]
@@ -96,6 +109,14 @@ def generate_with_guidance(script,model,tokenizer):
     out = out[0:len(out)-1-5].rstrip()
     out = out[:len(out)-1-1] + "\n}"
     #out = out[0:-1] + "\n}"
+
+    #freeing memory
+    model,tokenizer = None,None
+    del program 
+    guidance.llm=None
+    gc.collect()
+    torch.cuda.empty_cache()
+
     return out
     
 def generate(script):
@@ -105,8 +126,15 @@ def generate(script):
 #     return tokenizer.decode(output[0], skip_prompt = True,skip_special_tokens=True)
 
     #USING GUIDANCE
-    return generate_with_guidance(script = script, model = model, tokenizer = tokenizer)
+    out=generate_with_guidance(script = script, model = model, tokenizer = tokenizer)
     
+    #clearing memory
+    model,tokenizer = None,None
+    guidance.llm=None
+    gc.collect()
+    torch.cuda.empty_cache()
+    
+    return out
 def sanityCheck(JSONDict: dict):
     #function to check if JSON is correct, written at end after format is finalized
     return True
@@ -125,4 +153,32 @@ def createJSON(script : str):
 #         #generic error print
 #         print(str(e))
     
+    
+    gc.collect()
+    torch.cuda.empty_cache()
     return JSONDict
+
+def main():
+    model,tokenizer = load_llm()
+    script = ""
+    with open('./temp/script.txt','r') as file:
+        script = file.read()
+        file.close()
+    charList = get_char_list(script,model,tokenizer)
+    jsonDict = generate_with_guidance(script,model,tokenizer)
+    #with tempfile.NamedTemporaryFile(mode = 'w',delete=False) as JSON_tmp:
+     #   JSON_tmp.write(str(jsonDict))
+      #  JSON_tmp.close()
+
+    #with tempfile.NamedTemporaryFile(mode = 'w', delete = False) as char_tmp:
+     #   char_tmp.write(', '.join.charList)
+      #  char_tmp.close()
+    with open('./temp/charList.txt','w') as file:
+        file.write(charList)
+        file.close()
+    with open('./temp/preppedJSON.txt', 'w') as file:
+        file.write(str(jsonDict))
+        file.close()
+    print('Script Analysed!')
+if __name__=="__main__":
+    main()

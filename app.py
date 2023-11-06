@@ -70,7 +70,7 @@ with input_script_container:
 process_script_container=st.container()
 #change line to pipeline api
 
-charDf,sceneList=adapter.preprocess_script(script)
+charDf,sceneList=adapter.preprocess_script(script,TEXT_GIVEN)
 
 
 
