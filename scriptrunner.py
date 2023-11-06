@@ -3,6 +3,7 @@ from torch.cuda import empty_cache
 import gc
 import os
 import subprocess
+import json
 def run_inference(model,prompt,num_frames,width,height,window_size,num_steps,custom_pipeline_path="sd-leap-booster/text-inversion-model/learned_embeds.bin",custom_pipeline=None,fps=17,seed=6969,guidance=25,output_folder="/output", sop = "/output",prompt_num = 0):
     custom_pipeline_path = "sd-leap-booster/text-inversion-model/learned_embeds.bin"
     
@@ -55,6 +56,23 @@ def run_inference(model,prompt,num_frames,width,height,window_size,num_steps,cus
 
     empty_cache()
     gc.collect()
+
+def script_preprocess(script: str):
+    subprocess.run(['script_preprocessor'])
+    empty_cache()
+    gc.collect()
+    charList = []
+    prepped_JSON_dict = {}
+    with open('./temp/charList.txt', 'r') as file:
+        file_content = file.read()
+        charList = file_content.split(',')
+        file.close()
+    with open('./temp/preppedJSON.txt','r') as file:
+        file_content = file.read()
+        prepped_JSON_dict = json.loads(file_content)
+        file.close()
+    return charList, prepped_JSON_dict
+
 
 def addCharacter(character,path_to_input_images,output_folder):
     path_to_custom_pipeline = "sd-leap-booster/text-inversion-model/learned_embeds.bin"

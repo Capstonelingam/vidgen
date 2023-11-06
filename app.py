@@ -4,6 +4,7 @@ import adapter
 from PIL import Image
 import os
 import base64
+from utils.get_character_images import get_character_images
 
 
 #states of the application
@@ -57,6 +58,9 @@ with input_script_container:
         if script:
             TEXT_GIVEN=True
             st.text(script)
+            with open('./temp/script.txt', 'w') as file:
+                file.write(script)
+                file.close()
             st.success("Script Uploaded Successfully")
 
 

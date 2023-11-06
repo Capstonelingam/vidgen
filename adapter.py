@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import script_preprocessor as sp
+import scriptrunner
 import torch
 import gc
 
@@ -34,15 +35,19 @@ def preprocess_script(script,script_given):
 
     else:
     #add function to call to model api
-        charList=sp.get_char_list(script)
-        sceneDf=sp.createJSON(script)
-     
+       # charList=sp.get_char_list(script)
+        #sceneDf=sp.createJSON(script)
+        charList,sceneJSON = sr.script_preprocessor(script)
         torch.cuda.empty_cache()
         gc.collect()
+        promptList = []
+        for scene in sceneJSON.keys():
+            for action in sceneJSON[scene]['Actions']:
+                promptList.append(action + "in " + sceneJSON[scene]['Env'])
 
         ##still a list of characters
         print(charList)
-        print(sceneDf)
+        print(sceneJson)
 
         print()
         print()
@@ -50,9 +55,7 @@ def preprocess_script(script,script_given):
 
         check_memory()
 
-
-
-    return charDf,sceneList
+    return charDf,promptList
 
 def textual_invertor(charDf):
     #add function to call to model api
