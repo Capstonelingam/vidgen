@@ -46,7 +46,16 @@ def get_char_list(script,model,tokenizer):
     [{{gen 'characters' max_tokens = 300 temperature = 0.2 stop = ']' }}]
     """)
     out = characters(story = script).variables()['characters']
+    
+
+    # initializing bad_chars_list
+    bad_chars = ["'", '_', '!', "*"]
+    out = ''.join((filter(lambda i: i not in bad_chars, 
+                              out)))
+
     charList = out.split(",")
+
+
     
 
     #freeing memory
@@ -173,6 +182,7 @@ def main():
     #with tempfile.NamedTemporaryFile(mode = 'w', delete = False) as char_tmp:
      #   char_tmp.write(', '.join.charList)
       #  char_tmp.close()
+    
     with open('./temp/charList.txt','w') as file:
         file.write(charList)
         file.close()

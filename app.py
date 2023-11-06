@@ -4,7 +4,7 @@ import adapter
 from PIL import Image
 import os
 import base64
-from utils.get_character_images import get_character_images
+
 
 
 #states of the application
@@ -17,6 +17,15 @@ IMAGES_LEARNED = False
 VIDEO_GENERATED = False
 VIDEO_UPSCALED = False
 VIDEO_INTERPOLATED = False
+
+
+
+
+listold=['./temp/'+x for x in os.listdir('./temp')]
+print(listold)
+for x in listold:
+    if os.path.isdir(x):
+        os.system('rm -rf '+x)
 
 
 
@@ -79,10 +88,10 @@ charDf,sceneList=adapter.preprocess_script(script,TEXT_GIVEN)
 
 
 
-def save_uploadedfile(uploadedfile):
-     with open(os.path.join("temp",uploadedfile.name),"wb") as f:
+def save_uploadedfile(uploadedfile,character_name):
+     with open(os.path.join("temp",character_name,uploadedfile.name),"wb") as f:
          f.write(uploadedfile.getbuffer())
-     return st.success("Saved File:{} to tempDir".format(uploadedfile.name))
+     return st.success("Saved File:{} to temp".format(uploadedfile.name))
 
 
 #character container
@@ -97,7 +106,8 @@ with character_container:
         uploaded_file=display_list[index].file_uploader(f"Upload Custom Image for {row['object-id']}",type=['png','jpg','jpeg'],help="Upload an image of the character")
 
         if uploaded_file:
-            save_uploadedfile(uploaded_file)
+            save_uploadedfile(uploaded_file,row['object-id'])
+            os.remove(row['image-path'])
             row['image-path']=os.path.join("temp",uploaded_file.name)
             image_file=Image.open(row['image-path'])
             display_list[index].image(image_file,caption=row['object-id'])
@@ -107,10 +117,14 @@ with character_container:
         st.code(sceneList[i])
     st.markdown("---", unsafe_allow_html=True)
 
+charDf=adapter.make_image_dataset(charDf)
+promptList=adapter.preprocess_prompt(charDf,sceneList)
 
+print(charDf,"preprocess done")
+print(promptList,"preprocess done")
 if st.button("Generate Video"):
     #textual inversion
-    model=adapter.textual_invertor(charDf)
+    model=adapter.train_textual_inversion(charDf)
 
     #call model
     video_path=adapter.video_generator(model,sceneList)

@@ -4,6 +4,9 @@ import gc
 import os
 import subprocess
 import json
+import pandas as pd
+
+
 def run_inference(model,prompt,num_frames,width,height,window_size,num_steps,custom_pipeline_path="sd-leap-booster/text-inversion-model/learned_embeds.bin",custom_pipeline=None,fps=17,seed=6969,guidance=25,output_folder="/output", sop = "/output",prompt_num = 0):
     custom_pipeline_path = "sd-leap-booster/text-inversion-model/learned_embeds.bin"
     
@@ -58,7 +61,7 @@ def run_inference(model,prompt,num_frames,width,height,window_size,num_steps,cus
     gc.collect()
 
 def script_preprocess(script: str):
-    subprocess.run(['script_preprocessor'])
+    subprocess.run(['python','script_preprocessor.py'])
     empty_cache()
     gc.collect()
     charList = []
@@ -71,14 +74,28 @@ def script_preprocess(script: str):
         file_content = file.read()
         prepped_JSON_dict = json.loads(file_content)
         file.close()
+    print(charList)
     return charList, prepped_JSON_dict
 
 
 def addCharacter(character,path_to_input_images,output_folder):
-    path_to_custom_pipeline = "sd-leap-booster/text-inversion-model/learned_embeds.bin"
+    
     
     #!leap_textual_inversion --pretrained_model_name_or_path=stabilityai/stable-diffusion-2-1-base --placeholder_token="<kunal>" --train_data_dir=train_images/kunal --learning_rate=0.001 --leap_model_path=weights/leap_ti_2.0_sd2.1_beta.ckpt --max_train_steps 300
-    subprocess.run(['leap_textual_inversion', '--pretrained_model_name_or_path=stabilityai/stable-diffusion-2-1-base', f'--placeholder_token="{character}"', '--train_data_dir='+path_to_input_images, '--learning_rate=0.001', '--leap_model_path=weights/leap_ti_2.0_sd2.1_beta.ckpt', '--max_train_steps 300','--output_dir='+output_folder])
-    return path_to_custom_pipeline
+    subprocess.run(['leap_textual_inversion', '--pretrained_model_name_or_path=stabilityai/stable-diffusion-2-1-base', 
+                    f'--placeholder_token="{character}"', 
+                    '--train_data_dir='+path_to_input_images, 
+                    '--learning_rate=0.001', 
+                    '--leap_model_path=sd-leap-booster/weights/leap_ti_2.0_sd2.1_beta.ckpt', 
+                    '--max_train_steps 300','--output_dir='+output_folder])
+    return output_folder
 
+
+def make_images_for_characters(characterList, output_folder):
+    characterListStr = ','.join(characterList)
+    print(characterListStr)    
+    characterListStr = characterListStr.replace(' ','')
+    subprocess.run(['python','utils/get_character_images.py','--characterList',characterListStr,'--output_folder',output_folder])
+    charDf=pd.read_csv(output_folder+"/charList.csv")
+    return charDf
 
