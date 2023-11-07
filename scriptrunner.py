@@ -70,7 +70,7 @@ def script_preprocess(script: str):
         file_content = file.read()
         charList = file_content.split(',')
         file.close()
-    with open('./temp/preppedJSON.txt','r') as file:
+    with open('./temp/preppedJSON.json','r') as file:
         file_content = file.read()
         prepped_JSON_dict = json.loads(file_content)
         file.close()

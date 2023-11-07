@@ -6,6 +6,8 @@ import torch
 import gc,os
 from utils.get_character_images import get_character_images
 from PIL import Image,ImageEnhance
+
+from script_to_video_pipeline import ScriptToVideoPipeline
 def check_memory():
     file=open('temp/memory.txt','w')
     for obj in gc.get_objects():
@@ -44,7 +46,7 @@ def preprocess_script(script,script_given):
         promptList = []
         for scene in sceneJSON.keys():
             for action in sceneJSON[scene]['Actions']:
-                promptList.append(action + "in " + sceneJSON[scene]['Env'])
+                promptList.append(action + " in " + sceneJSON[scene]['Env'])
 
 
         
@@ -61,13 +63,6 @@ def preprocess_script(script,script_given):
 
 
 
-def video_generator(model_path,sceneList):
-    #add function to call to model api
-
-    #placeholder
-    st.warning("Model not connected using placeholder values")
-    video_path='temp/video.gif'
-    return video_path
 
 
 def make_image_dataset(charDf):
@@ -112,14 +107,12 @@ def preprocess_prompt(charDf,promptList):
     #placeholder
 
     #replace James with <James>
-    
-    for i in range(len(promptList)):
-        prompt_words=promptList[i].split(' ')
-        for j in range(len(prompt_words)):
-            if prompt_words[j] in charDf['object-id'].values:
-                prompt_words[j]='<'+prompt_words[j]+'>'
-        promptList[i]=' '.join(prompt_words)
-    st.success("PromptList Preprocessed!")
+    for index,row in charDf.iterrows():
+        for i in range(len(promptList)):
+            if str(row['object-id']) in promptList[i]:
+                promptList[i]=promptList[i].replace(row['object-id'],'<'+row['object-id']+'>')
+
+  
     return promptList
         
 def train_textual_inversion():
@@ -137,3 +130,18 @@ def train_textual_inversion():
             else:
                 output_folder=sr.addCharacter(row['object-id'],row['image-path'],output_folder,pretrained=True)
     return output_folder
+
+
+def video_generator(model_path,sceneList):
+    promptList=['<<James>> and <<Mary>> are in a room', '<<James>> and <<Mary>> are eating an icecream']
+
+    if sceneList!=promptList:
+        
+        pipe=ScriptToVideoPipeline()
+        pipe.generate_video(sceneList,custom_pipeline=True,custom_pipeline_path=model_path,demo = True)
+        #add function to call to model api
+
+        #placeholder
+    st.warning("Model not connected using placeholder values")
+    video_path='temp/video.gif'
+    return video_path

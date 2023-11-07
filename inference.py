@@ -279,6 +279,9 @@ def inference(
         
         # prepare prompts
         if custom_pipeline:
+            print("Loading Custom Pipeline")
+            print("Pipeline AT ",custom_pipeline_path)
+            print("\n\n\n")
             pipe.load_textual_inversion(custom_pipeline_path)
         compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
 #         if custom_pipeline:

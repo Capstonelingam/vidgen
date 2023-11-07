@@ -36,15 +36,14 @@ def get_char_list(script,model,tokenizer):
    # model,tokenizer = load_llm()
     guidance.llm = guidance.llms.Transformers(model=model, tokenizer=tokenizer)
     characters = guidance("""[INST]
-    <<SYS>>
-    You are a bot that reads a story and returns a list of the characters in the story.
-    <</SYS>>
-    Create list of the names of the characters in the story given below.
-    Story - {{story}}
-    [/INST]
-    Here is the requested list of characters present in the story-
-    [{{gen 'characters' max_tokens = 300 temperature = 0.2 stop = ']' }}]
-    """)
+<<SYS>>
+You are a bot that reads a story and returns a list of the characters in the story.
+<</SYS>>
+Create list of the names of the characters in the story below.
+Story - {{story}}
+[/INST]
+Here is the requested list of characters present in the story-
+[{{gen 'characters' max_tokens = 300 temperature = 0.2 stop = ']' }}]""")
     out = characters(story = script).variables()['characters']
     
 
@@ -186,7 +185,7 @@ def main():
     with open('./temp/charList.txt','w') as file:
         file.write(charList)
         file.close()
-    with open('./temp/preppedJSON.txt', 'w') as file:
+    with open('./temp/preppedJSON.json', 'w') as file:
         file.write(str(jsonDict))
         file.close()
     print('Script Analysed!')

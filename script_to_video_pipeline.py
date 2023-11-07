@@ -14,7 +14,7 @@ from moviepy.editor import VideoFileClip, VideoFileClip
 from moviepy.editor import concatenate_videoclips
 from moviepy.editor import clips_array
 class ScriptToVideoPipeline:
-    def __init__(self, script, model_path="cerspense/zeroscope_v2_576w"):
+    def __init__(self, script="EmptyScript", model_path="cerspense/zeroscope_v2_576w"):
         self.script = script
         self.model_path = model_path
     
@@ -68,7 +68,7 @@ class ScriptToVideoPipeline:
             export_to_video(video, f"{filename}.mp4", fps)
 
 
-    def generate_video(self,sceneList, model, init_video=None, seed=6969, custom_pipeline=False,window_size=50,num_frames=50,custom_pipeline_path=None):
+    def generate_video(self,sceneList, model="cerspense/zeroscope_v2_576w", init_video=None, seed=6969, custom_pipeline=False,window_size=50,num_frames=50,custom_pipeline_path="", demo = False):
         
          #to make a file handling solution for this
         #give an option to the user to either use the previous video or not
@@ -81,6 +81,9 @@ class ScriptToVideoPipeline:
 
         #init_video = "takes the path to the previous video that has already been generated"
         init_video = None
+
+        if demo == True:
+            sceneList = sceneList[0:2]
 
         for scene_num,scene in enumerate(sceneList):
             torch.cuda.empty_cache()
@@ -97,7 +100,7 @@ class ScriptToVideoPipeline:
                           height=300,
                           window_size=50,
                         num_steps=100,
-                        custom_pipeline_path="",
+                        custom_pipeline_path=custom_pipeline_path,
                         custom_pipeline=False,
                         seed=6969,
                         guidance=25,

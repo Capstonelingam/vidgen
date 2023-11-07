@@ -14,7 +14,7 @@ def get_character_images(characterList,output_folder):
         print(character)
         os.mkdir(output_folder + '/'+character)
     
-        prompt = "A waist up potrait of james, realistic , high quality" +character
+        prompt = f"A waist up potrait of {character}, realistic , high quality" +character
 
         image = pipe(prompt, num_inference_steps=50).images[0]
         image_path=output_folder+ '/'+ character+'/' +character+ ".png"

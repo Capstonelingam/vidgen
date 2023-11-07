@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 import script_preprocessor
 
-text = """In a small, remote village surrounded by dense forests, lived a young girl named Elara. Elara was unlike any other child in the village, for she possessed an insatiable curiosity and a deep love for exploration. Her favorite place in the world was her grandfather's study, a room filled with dusty books, old maps, and an antique globe.
+model,tokenizer = script_preprocessor.load_llm()
+text = """Title: "The Enchanted Atlas"
+
+In a small, remote village surrounded by dense forests, lived a young girl named Elara. Elara was unlike any other child in the village, for she possessed an insatiable curiosity and a deep love for exploration. Her favorite place in the world was her grandfather's study, a room filled with dusty books, old maps, and an antique globe.
 
 Elara's grandfather, affectionately known as Old Geppetto, was a retired cartographer who had spent his youth traveling the world and mapping the most remote and enigmatic places. He was renowned for his expertise and the intricate, hand-drawn maps he created.
 
@@ -33,9 +36,7 @@ With hearts filled with wonder, they left the caverns, their spirits uplifted, k
 
 Years passed, and Elara and her grandfather continued their journeys, forever guided by the Enchanted Atlas. They grew to appreciate the world's beauty and its endless secrets. The atlas had taught them that the most remarkable adventures were not found in far-off lands but in the boundless imagination of those who dared to dream.
 
-As they ventured into their golden years, they remained the heart and soul of their village, inspiring the next generation with their tales of wonder and their belief that every dream, no matter how fantastical, could become a reality. Elara had learned that the greatest treasure in life was the wisdom passed down through generations and the endless magic found within the pages of the Enchanted Atlas."
-"""
-print(script_preprocessor.get_char_list(text))
-print(script_preprocessor.createJSON(text))
-while True:
-    print("Hello")
+As they ventured into their golden years, they remained the heart and soul of their village, inspiring the next generation with their tales of wonder and their belief that every dream, no matter how fantastical, could become a reality. Elara had learned that the greatest treasure in life was the wisdom passed down through generations and the endless magic found within the pages of the Enchanted Atlas."""
+print(script_preprocessor.get_char_list(text,model,tokenizer))
+print(script_preprocessor.generate_with_guidance(text,model,tokenizer))
+
