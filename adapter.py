@@ -71,6 +71,8 @@ def video_generator(model_path,sceneList):
 
 
 def make_image_dataset(charDf):
+    print("populating image dataset")
+    st.success("Populating Image Dataset")
     for index,row in charDf.iterrows():
         #call textual inversion here
         temp_folder='/'.join(row['image-path'].split('/')[:-1])+'/'
@@ -94,16 +96,16 @@ def make_image_dataset(charDf):
 
         vertical.save(temp_folder+'vertical_'+row['object-id']+'.png')
         horizontal.save(temp_folder+'horizontal_'+row['object-id']+'.png')
-        rotated.save(temp_folder+'rotated_'+row['object-id']+'.png')
-        sharper.save(temp_folder+'sharper_'+row['object-id']+'.png')
-        blurred.save(temp_folder+'blurred_'+row['object-id']+'.png')
-        brighter.save(temp_folder+'brighter_'+row['object-id']+'.png')
-        darker.save(temp_folder+'darker_'+row['object-id']+'.png')
+        # rotated.save(temp_folder+'rotated_'+row['object-id']+'.png')
+        # sharper.save(temp_folder+'sharper_'+row['object-id']+'.png')
+        # blurred.save(temp_folder+'blurred_'+row['object-id']+'.png')
+        # brighter.save(temp_folder+'brighter_'+row['object-id']+'.png')
+        # darker.save(temp_folder+'darker_'+row['object-id']+'.png')
 
         
         row['image-path']=temp_folder
 
-
+    st.success("Populated Image Dataset")
     return charDf
 def preprocess_prompt(charDf,promptList):
     #add function to call to model api
@@ -117,12 +119,21 @@ def preprocess_prompt(charDf,promptList):
             if prompt_words[j] in charDf['object-id'].values:
                 prompt_words[j]='<'+prompt_words[j]+'>'
         promptList[i]=' '.join(prompt_words)
+    st.success("PromptList Preprocessed!")
     return promptList
         
-def train_textual_inversion(charDf):
-    output_folder='temp/sd_model'
-    os.mkdir(output_folder)
-
-    
-    for index,row in charDf.iterrows():
-        sr.addCharacter(row['object-id'],row['image-path'],'temp/sd_model/')
+def train_textual_inversion():
+    placeholder_csv=pd.read_csv('temp/placeholder.csv')
+    charDf=pd.read_csv('temp/charFinal.csv')
+    output_folder='temp/model'
+    if placeholder_csv.equals(charDf)==False:
+        os.mkdir(output_folder)
+        print(charDf)
+        pretrained=False    
+        for index,row in charDf.iterrows():
+            if pretrained==False:
+                output_folder=sr.addCharacter(row['object-id'],row['image-path'],output_folder=output_folder)
+                pretrained=True
+            else:
+                output_folder=sr.addCharacter(row['object-id'],row['image-path'],output_folder,pretrained=True)
+    return output_folder

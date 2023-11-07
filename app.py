@@ -85,7 +85,7 @@ process_script_container=st.container()
 
 charDf,sceneList=adapter.preprocess_script(script,TEXT_GIVEN)
 
-
+sceneList=adapter.preprocess_prompt(charDf,sceneList)
 
 
 def save_uploadedfile(uploadedfile,character_name):
@@ -116,37 +116,40 @@ with character_container:
     for i in range(len(sceneList)):
         st.code(sceneList[i])
     st.markdown("---", unsafe_allow_html=True)
+if IMAGES_CONFIRM:
+    charFinal=adapter.make_image_dataset(charDf)
+    charFinal.to_csv('./temp/charFinal.csv',index=False)
 
-charDf=adapter.make_image_dataset(charDf)
-promptList=adapter.preprocess_prompt(charDf,sceneList)
+print(charFinal,"preprocess done")
+print(sceneList,"preprocess done")
 
-print(charDf,"preprocess done")
-print(promptList,"preprocess done")
-if st.button("Generate Video"):
     #textual inversion
-    model=adapter.train_textual_inversion(charDf)
 
-    #call model
-    video_path=adapter.video_generator(model,sceneList)
-
+if st.button("Generate Video"):
+    IMAGES_LEARNED=True
 
 
 
+#video_player
+model=adapter.train_textual_inversion()
 
-    #video_player
-    video_player_container=st.container()
-    with video_player_container:
-        st.header("Video Player")
-        
-        file_ = open(video_path, "rb")
-        contents = file_.read()
-        data_url = base64.b64encode(contents).decode("utf-8")
-        file_.close()
+#call model
+video_path=adapter.video_generator(model,sceneList)
 
-        st.markdown(
-            f'<img src="data:image/gif;base64,{data_url}" alt="Video File">',
-            unsafe_allow_html=True,
-    )
+video_player_container=st.container()
+with video_player_container:
+    st.header("Video Player")
+    
+    file_ = open(video_path, "rb")
+    contents = file_.read()
+    data_url = base64.b64encode(contents).decode("utf-8")
+    file_.close()
+
+    st.markdown(
+        f'<img src="data:image/gif;base64,{data_url}" alt="Video File">',
+        unsafe_allow_html=True,
+
+)
         
 #footer
 footer_container=st.container()

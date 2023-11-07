@@ -78,16 +78,36 @@ def script_preprocess(script: str):
     return charList, prepped_JSON_dict
 
 
-def addCharacter(character,path_to_input_images,output_folder):
+def addCharacter(character,path_to_input_images,output_folder,pretrained=False):
     
+    if pretrained==False:
     
-    #!leap_textual_inversion --pretrained_model_name_or_path=stabilityai/stable-diffusion-2-1-base --placeholder_token="<kunal>" --train_data_dir=train_images/kunal --learning_rate=0.001 --leap_model_path=weights/leap_ti_2.0_sd2.1_beta.ckpt --max_train_steps 300
-    subprocess.run(['leap_textual_inversion', '--pretrained_model_name_or_path=stabilityai/stable-diffusion-2-1-base', 
-                    f'--placeholder_token="{character}"', 
-                    '--train_data_dir='+path_to_input_images, 
-                    '--learning_rate=0.001', 
-                    '--leap_model_path=sd-leap-booster/weights/leap_ti_2.0_sd2.1_beta.ckpt', 
-                    '--max_train_steps 300','--output_dir='+output_folder])
+        #!leap_textual_inversion 
+        # --pretrained_model_name_or_path=stabilityai/stable-diffusion-2-1-base 
+        # --placeholder_token="<kunal>" 
+        # --train_data_dir=train_images/kunal 
+        # --learning_rate=0.001 
+        # --leap_model_path=weights/leap_ti_2.0_sd2.1_beta.ckpt 
+        # --max_train_steps 100 
+        subprocess.run(['leap_textual_inversion',
+                        '--pretrained_model_name_or_path=stabilityai/stable-diffusion-2-1-base',
+                        f'--placeholder_token="<{character}>"',
+                        f'--train_data_dir={path_to_input_images}' ,
+                        '--learning_rate=0.001',
+                        '--leap_model_path=sd-leap-booster/weights/leap_ti_2.0_sd2.1_beta.ckpt',
+                        f'--output_dir={output_folder}'
+                        ])
+    else:
+        subprocess.run(['leap_textual_inversion',
+                    f'--pretrained_model_name_or_path={output_folder}',
+                    f'--placeholder_token="<{character}>"',
+                    f'--train_data_dir={path_to_input_images}' ,
+                    '--learning_rate=0.001',
+                    '--leap_model_path=sd-leap-booster/weights/leap_ti_2.0_sd2.1_beta.ckpt',
+                    '--output_dir='+output_folder
+                    ])
+
+
     return output_folder
 
 
