@@ -174,14 +174,7 @@ def main():
         file.close()
     charList = get_char_list(script,model,tokenizer)
     jsonDict = generate_with_guidance(script,model,tokenizer)
-    #with tempfile.NamedTemporaryFile(mode = 'w',delete=False) as JSON_tmp:
-     #   JSON_tmp.write(str(jsonDict))
-      #  JSON_tmp.close()
-
-    #with tempfile.NamedTemporaryFile(mode = 'w', delete = False) as char_tmp:
-     #   char_tmp.write(', '.join.charList)
-      #  char_tmp.close()
-    
+  
     with open('./temp/charList.txt','w') as file:
         file.write(charList)
         file.close()

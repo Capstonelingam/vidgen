@@ -56,7 +56,6 @@ def initialize_pipeline(
 
     return pipe
 
-
 def prepare_input_latents(
     pipe: TextToVideoSDPipeline,
     batch_size: int,
@@ -80,7 +79,6 @@ def prepare_input_latents(
 
     return latents
 
-
 def encode(pipe: TextToVideoSDPipeline, pixels: Tensor, batch_size: int = 8):
     nf = pixels.shape[2]
     pixels = rearrange(pixels, "b c f h w -> (b f) c h w")
@@ -98,7 +96,6 @@ def encode(pipe: TextToVideoSDPipeline, pixels: Tensor, batch_size: int = 8):
     latents = rearrange(latents, "(b f) c h w -> b c f h w", f=nf)
 
     return latents
-
 
 def decode(pipe: TextToVideoSDPipeline, latents: Tensor, batch_size: int = 8):
     nf = latents.shape[2]
@@ -118,7 +115,6 @@ def decode(pipe: TextToVideoSDPipeline, latents: Tensor, batch_size: int = 8):
 
     return pixels.float()
 
-
 def primes_up_to(n):
     sieve = np.ones(n // 3 + (n % 6 == 2), dtype=bool)
     for i in range(1, int(n**0.5) // 3 + 1):
@@ -127,7 +123,6 @@ def primes_up_to(n):
             sieve[k * k // 3 :: 2 * k] = False
             sieve[k * (k - 2 * (i & 1) + 4) // 3 :: 2 * k] = False
     return np.r_[2, 3, ((3 * np.nonzero(sieve)[0][1:] + 1) | 1)]
-
 
 @torch.inference_mode()
 def diffuse(
@@ -245,7 +240,6 @@ def diffuse(
 
     return new_latents
 
-
 @torch.inference_mode()
 def inference(
     model: str,
@@ -320,7 +314,6 @@ def inference(
         videos = decode(pipe, latents, vae_batch_size)
 
     return videos
-
 
 if __name__ == "__main__":
     import decord

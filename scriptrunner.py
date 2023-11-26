@@ -7,8 +7,8 @@ import json
 import pandas as pd
 
 
-def run_inference(model,prompt,num_frames,width,height,window_size,num_steps,custom_pipeline_path="sd-leap-booster/text-inversion-model/learned_embeds.bin",custom_pipeline=None,fps=17,seed=6969,guidance=25,output_folder="/output", sop = "/output",prompt_num = 0):
-    custom_pipeline_path = "sd-leap-booster/text-inversion-model/learned_embeds.bin"
+def run_inference(model,prompt,num_frames,width,height,window_size,num_steps,custom_pipeline_path="temp/model/learned_embeds.bin",custom_pipeline=None,fps=17,seed=6969,guidance=25,output_folder="/output", sop = "/output",prompt_num = 0):
+    custom_pipeline_path ="temp/model/learned_embeds.bin"
     
     print(sop)
 #     os.system(f'python inference.py \
@@ -78,7 +78,7 @@ def script_preprocess(script: str):
     return charList, prepped_JSON_dict
 
 
-def addCharacter(character,path_to_input_images,output_folder,pretrained=False):
+def addCharacter(character,path_to_input_images,output_folder,pretrained=False,num_steps=100):
     
     if pretrained==False:
     
@@ -95,7 +95,8 @@ def addCharacter(character,path_to_input_images,output_folder,pretrained=False):
                         f'--train_data_dir={path_to_input_images}' ,
                         '--learning_rate=0.001',
                         '--leap_model_path=sd-leap-booster/weights/leap_ti_2.0_sd2.1_beta.ckpt',
-                        f'--output_dir={output_folder}'
+                        f'--output_dir={output_folder}',
+                        '--max_train_steps',str(num_steps)
                         ])
     else:
         subprocess.run(['leap_textual_inversion',
@@ -104,10 +105,11 @@ def addCharacter(character,path_to_input_images,output_folder,pretrained=False):
                     f'--train_data_dir={path_to_input_images}' ,
                     '--learning_rate=0.001',
                     '--leap_model_path=sd-leap-booster/weights/leap_ti_2.0_sd2.1_beta.ckpt',
-                    '--output_dir='+output_folder
+                    '--output_dir='+output_folder,
+                    '--max_train_steps',num_steps
                     ])
 
-
+    print(f'{output_folder}/learned_embeds.bin')
     return output_folder
 
 

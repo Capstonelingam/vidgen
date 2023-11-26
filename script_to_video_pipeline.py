@@ -47,8 +47,6 @@ class ScriptToVideoPipeline:
         # returns path to upscaled videos
         return path_to_videos
 
-
-    
     def save_video(self, videos,fps=30, filename="outputs/test_video",remove_watermark=False):
         # saves video to path
     
@@ -66,7 +64,6 @@ class ScriptToVideoPipeline:
             video = video.byte().cpu().numpy()
 
             export_to_video(video, f"{filename}.mp4", fps)
-
 
     def generate_video(self,sceneList, model="cerspense/zeroscope_v2_576w", init_video=None, seed=6969, custom_pipeline=False,window_size=50,num_frames=50,custom_pipeline_path="", demo = False):
         
@@ -144,8 +141,9 @@ class ScriptToVideoPipeline:
         # Clean up (optional) - delete the original files from the input directory
         for mp4_file in mp4_files:
             os.remove(os.path.join(input_directory, mp4_file))
+        
+        return output_file
            
-
     def run(self):
         import decord
         import gc
@@ -170,7 +168,6 @@ class ScriptToVideoPipeline:
                 sceneList.append(action + "in " + sceneJSON[scene]['Env'])
         print(sceneList)                        
         self.generate_video(sceneList[0:2], model=self.model_path, init_video=None, seed=6969, custom_pipeline=False)
-
 
     def addCharacters(charList,init_model):
         custom_pipeline_path = "sd-leap-booster/text-inversion-model/learned_embeds.bin"

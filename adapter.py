@@ -61,10 +61,6 @@ def preprocess_script(script,script_given):
 
     return charDf,promptList
 
-
-
-
-
 def make_image_dataset(charDf):
     print("populating image dataset")
     st.success("Populating Image Dataset")
@@ -91,17 +87,18 @@ def make_image_dataset(charDf):
 
         vertical.save(temp_folder+'vertical_'+row['object-id']+'.png')
         horizontal.save(temp_folder+'horizontal_'+row['object-id']+'.png')
-        # rotated.save(temp_folder+'rotated_'+row['object-id']+'.png')
-        # sharper.save(temp_folder+'sharper_'+row['object-id']+'.png')
-        # blurred.save(temp_folder+'blurred_'+row['object-id']+'.png')
-        # brighter.save(temp_folder+'brighter_'+row['object-id']+'.png')
-        # darker.save(temp_folder+'darker_'+row['object-id']+'.png')
+        rotated.save(temp_folder+'rotated_'+row['object-id']+'.png')
+        sharper.save(temp_folder+'sharper_'+row['object-id']+'.png')
+        blurred.save(temp_folder+'blurred_'+row['object-id']+'.png')
+        brighter.save(temp_folder+'brighter_'+row['object-id']+'.png')
+        darker.save(temp_folder+'darker_'+row['object-id']+'.png')
 
         
         row['image-path']=temp_folder
 
     st.success("Populated Image Dataset")
     return charDf
+
 def preprocess_prompt(charDf,promptList):
     #add function to call to model api
     #placeholder
@@ -113,8 +110,8 @@ def preprocess_prompt(charDf,promptList):
                 promptList[i]=promptList[i].replace(row['object-id'],'<'+row['object-id']+'>')
 
   
-    return promptList
-        
+    return promptList  
+
 def train_textual_inversion():
     placeholder_csv=pd.read_csv('temp/placeholder.csv')
     charDf=pd.read_csv('temp/charFinal.csv')
@@ -129,8 +126,7 @@ def train_textual_inversion():
                 pretrained=True
             else:
                 output_folder=sr.addCharacter(row['object-id'],row['image-path'],output_folder,pretrained=True)
-    return output_folder
-
+    return output_folder+"/learned_embeds.bin"
 
 def video_generator(model_path,sceneList):
     promptList=['<<James>> and <<Mary>> are in a room', '<<James>> and <<Mary>> are eating an icecream']
@@ -138,10 +134,11 @@ def video_generator(model_path,sceneList):
     if sceneList!=promptList:
         
         pipe=ScriptToVideoPipeline()
-        pipe.generate_video(sceneList,custom_pipeline=True,custom_pipeline_path=model_path,demo = True)
+        video_path=pipe.generate_video(sceneList,custom_pipeline=True,custom_pipeline_path=model_path,demo = False)
         #add function to call to model api
 
         #placeholder
-    st.warning("Model not connected using placeholder values")
-    video_path='temp/video.gif'
+    else:
+        st.warning("Model not connected using placeholder values")
+        video_path='temp/video.gif'
     return video_path
