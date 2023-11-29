@@ -5,8 +5,6 @@ from PIL import Image
 import os
 import base64
 
-
-
 #states of the application
 TEXT_GIVEN = False
 TEXT_ANALYSED = False
@@ -18,16 +16,11 @@ VIDEO_GENERATED = False
 VIDEO_UPSCALED = False
 VIDEO_INTERPOLATED = False
 
-
-
-
 listold=['./temp/'+x for x in os.listdir('./temp')]
 print(listold)
 for x in listold:
     if os.path.isdir(x):
         os.system('rm -rf '+x)
-
-
 
 #setup
 st.set_page_config(page_title="Script In Video Out",page_icon='assets/icon.jpeg')
@@ -47,8 +40,6 @@ with header_container:
     """
     st.caption(caption_body,unsafe_allow_html=True)
     st.markdown("---", unsafe_allow_html=True)
-
-
 
 
 #input container
@@ -93,7 +84,6 @@ def save_uploadedfile(uploadedfile,character_name):
          f.write(uploadedfile.getbuffer())
      return st.success("Saved File:{} to temp".format(uploadedfile.name))
 
-
 #character container
 character_container=st.container()
 with character_container:
@@ -127,8 +117,6 @@ print(sceneList,"preprocess done")
 
 if st.button("Generate Video"):
     IMAGES_LEARNED=True
-
-
 
 #video_player
 model=adapter.train_textual_inversion()
@@ -197,5 +185,3 @@ with footer_container:
         st.markdown(contact_info, unsafe_allow_html=True)
 
     st.markdown("---", unsafe_allow_html=True) 
-        
-

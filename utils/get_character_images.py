@@ -8,7 +8,7 @@ def get_character_images(characterList,output_folder):
     model_id ="stabilityai/stable-diffusion-2-1-base" 
     pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to("cuda")
     print(characterList)
-
+    torch.manual_seed(1010)
     image_path_list=[]
     for character in characterList:
         print(character)

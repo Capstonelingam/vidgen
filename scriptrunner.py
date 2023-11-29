@@ -8,7 +8,7 @@ import pandas as pd
 
 
 def run_inference(model,prompt,num_frames,width,height,window_size,num_steps,custom_pipeline_path="temp/model/learned_embeds.bin",custom_pipeline=None,fps=17,seed=6969,guidance=25,output_folder="/output", sop = "/output",prompt_num = 0):
-    custom_pipeline_path ="temp/model/learned_embeds.bin"
+    custom_pipeline_path =custom_pipeline_path
     
     print(sop)
 #     os.system(f'python inference.py \
@@ -39,12 +39,13 @@ def run_inference(model,prompt,num_frames,width,height,window_size,num_steps,cus
 #         -g 25 \
 #         --sdp\
 #     ')
+    print("width",500,"height",500)
     command_list=["python", "inference.py", 
                   "--model", "cerspense/zeroscope_v2_576w", 
-                  "--prompt", prompt, "--num-frames", str(24), 
-                  "--width", str(256), "--height", str(256), 
+                  "--prompt", prompt, "--num-frames", str(60), 
+                  "--width", str(300), "--height", str(300), 
                   "--window-size", str(60), 
-                  "--num-steps", str(400), "--custom_pipeline_path", custom_pipeline_path, 
+                  "--num-steps", str(150), "--custom_pipeline_path", custom_pipeline_path, 
                   "--custom_pipeline", str(custom_pipeline), 
                   "--fps", str(18), "--seed", str(420), "-g", str(guidance), 
                   "--sdp", 
@@ -93,7 +94,6 @@ def addCharacter(character,path_to_input_images,output_folder,pretrained=False,n
                         '--pretrained_model_name_or_path=stabilityai/stable-diffusion-2-1-base',
                         f'--placeholder_token="<{character}>"',
                         f'--train_data_dir={path_to_input_images}' ,
-                        '--learning_rate=0.001',
                         '--leap_model_path=sd-leap-booster/weights/leap_ti_2.0_sd2.1_beta.ckpt',
                         f'--output_dir={output_folder}',
                         '--max_train_steps',str(num_steps)
@@ -103,7 +103,6 @@ def addCharacter(character,path_to_input_images,output_folder,pretrained=False,n
                     f'--pretrained_model_name_or_path={output_folder}',
                     f'--placeholder_token="<{character}>"',
                     f'--train_data_dir={path_to_input_images}' ,
-                    '--learning_rate=0.001',
                     '--leap_model_path=sd-leap-booster/weights/leap_ti_2.0_sd2.1_beta.ckpt',
                     '--output_dir='+output_folder,
                     '--max_train_steps',num_steps

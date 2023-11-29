@@ -239,6 +239,24 @@ def diffuse(
         new_latents = torch.roll(new_latents, shifts=-total_shift, dims=2)
 
     return new_latents
+@torch.inference_mode()
+def load_inversion(learned_embeds_path,text_encoder,tokenizer):
+    load_learned_embeds=torch.load(learned_embeds_path)
+    tokenList=list(load_learned_embeds.keys())
+    for token in tokenList:
+        embeds=load_learned_embeds[token]
+        dtype=text_encoder.get_input_embeddings().weight.dtype
+        embeds=embeds.to(dtype=dtype)
+
+        num_added_tokens = tokenizer.add_tokens(token)
+        if num_added_tokens==0:
+            print(f"Warning: Token {token} already exists! Will replace this token in-memory!")
+        text_encoder.resize_token_embeddings(len(tokenizer))
+        token_id=tokenizer.convert_tokens_to_ids(token)
+        text_encoder.get_input_embeddings().weight.data[token_id] = embeds
+        print(f"Loaded Embeddings for Token {token}")
+    
+    return text_encoder,tokenizer
 
 @torch.inference_mode()
 def inference(
@@ -265,19 +283,26 @@ def inference(
     custom_pipeline_path: str = ""
 ):
     if seed is not None:
-        torch.manual_seed(seed)
-
+        torch.manual_seed(seed) 
+    pipeline = StableDiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-2-1-base")
+    if custom_pipeline:
+            print("Loading Custom Pipeline")
+            print("Pipeline AT ",custom_pipeline_path)
+            print("\n\n\n")
+        
+            text_encoder,tokenizer=load_inversion(custom_pipeline_path,pipeline.text_encoder,pipeline.tokenizer)
+    
     with torch.autocast(device, dtype=torch.half):
         # prepare models
         pipe = initialize_pipeline(model, device, xformers, sdp, lora_path, lora_rank)
         
         # prepare prompts
-        if custom_pipeline:
-            print("Loading Custom Pipeline")
-            print("Pipeline AT ",custom_pipeline_path)
-            print("\n\n\n")
-            pipe.load_textual_inversion(custom_pipeline_path)
-        compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
+        # if custom_pipeline:
+        #     print("Loading Custom Pipeline")
+        #     print("Pipeline AT ",custom_pipeline_path)
+        #     print("\n\n\n")
+        #     pipe=load_inversion(pipe,custom_pipeline_path)
+        compel = Compel(tokenizer=tokenizer, text_encoder=text_encoder)
 #         if custom_pipeline:
 #             aux_pipe=StableDiffusionPipeline.from_single_file('./custom_tensors/aa_dp-11.safetensors')
 #             compel=Compel(tokenizer=aux_pipe.tokenizer, text_encoder=aux_pipe.text_encoder)
